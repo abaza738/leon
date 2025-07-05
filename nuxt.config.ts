@@ -30,7 +30,7 @@ export default defineNuxtConfig({
       ],
     },
     rootTag: 'main',
-    rootAttrs: { class: 'flex-1 flex flex-col bg-primary', id: 'leon' },
+    rootAttrs: { class: 'flex-1 flex flex-col bg-teal-100', id: 'leon' },
   },
 
   modules: ['@nuxt/ui', 'nuxt-auth-utils'],

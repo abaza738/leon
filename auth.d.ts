@@ -11,6 +11,7 @@ declare module '#auth-utils' {
 
   interface UserSession {
     user: User
+    isAdmin: boolean
   }
 
   interface SecureSessionData {
