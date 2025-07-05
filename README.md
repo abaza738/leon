@@ -7,69 +7,30 @@ Look at [Nuxt docs](https://nuxt.com/docs/getting-started/introduction) and [Nux
 Make sure to install the dependencies:
 
 ```bash
-# npm
-npm install
-
 # pnpm
 pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
 ```
 
 ## Development Server
 
+### Environment Variables
+
+Google OAuth is used for authentication. You need to setup a project and [create an OAuth Client via Google Cloud Console](./docs/google-oauth.md).
+
+Copy the variables from `.env.example` to a `.env` file.  
+Each variable has a doc string to explain its usage.
+
+```bash
+cp .env.example .env
+```
+
 Start the development server on `http://localhost:3000`:
 
 ```bash
-# npm
-npm run dev
-
 # pnpm
 pnpm run dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
 ```
 
-## Production
-
-Build the application for production:
-
-```bash
-# npm
-npm run build
-
-# pnpm
-pnpm run build
-
-# yarn
-yarn build
-
-# bun
-bun run build
-```
-
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm run preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
+## Deployemnt
 
 Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
