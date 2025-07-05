@@ -7,6 +7,5 @@
   "bracketSpacing": true,
   "htmlWhitespaceSensitivity": "strict",
   "objectWrap": "collapse",
-  "singleAttributePerLine": true,
-  "vueIndentScriptAndStyle": true
+  "singleAttributePerLine": true
 }

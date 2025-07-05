@@ -7,10 +7,5 @@
 </template>
 
 <script setup lang="ts">
-useHead({
-  bodyAttrs: {
-    class: 'flex flex-col'
-  },
-  title: 'Leon\'s Restaurant'
-})
+useHead({ bodyAttrs: { class: 'flex flex-col' }, title: "Leon's Restaurant" })
 </script>
