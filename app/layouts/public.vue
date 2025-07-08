@@ -3,11 +3,3 @@
     <slot />
   </div>
 </template>
-
-<script setup lang="ts">
-const { loggedIn } = useUserSession()
-
-if (loggedIn.value) {
-  navigateTo({ name: 'home' })
-}
-</script>

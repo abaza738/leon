@@ -11,6 +11,6 @@
 const { loggedIn } = useUserSession()
 
 if (!loggedIn.value) {
-  navigateTo({ name: 'auth' })
+  navigateTo({ name: 'login' })
 }
 </script>
