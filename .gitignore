@@ -22,3 +22,11 @@ logs
 .env
 .env.*
 !.env.example
+
+# PocketBase
+pocketbase/pb_data/
+pocketbase/pb_migrations/
+pocketbase/pb_hooks/
+pocketbase/pb_public/
+pocketbase/*.log
+pocketbase/backups/
