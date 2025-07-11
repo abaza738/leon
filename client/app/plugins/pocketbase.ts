@@ -8,27 +8,33 @@ export default defineNuxtPlugin(async () => {
 
   const cookie = useCookie<{ token: string; record: AuthRecord }>('pb_auth', {
     path: '/',
-    secure: true,
+    secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
-    httpOnly: false, // change to "true" if you want only server-side access
-    maxAge: 604800,
+    httpOnly: false, // Must be false for client-side access
+    maxAge: 604800, // 7 days
+    // default: () => ({ token: '', record: null }),
   })
 
-  // load the store data from the cookie value
-  pb.authStore.save(cookie.value?.token, cookie.value?.record)
+  // Load the store data from the cookie value
+  if (cookie.value?.token && cookie.value?.record) {
+    pb.authStore.save(cookie.value.token, cookie.value.record)
+  }
 
-  // send back the default 'pb_auth' cookie to the client with the latest store state
+  // Send back the default 'pb_auth' cookie to the client with the latest store state
   pb.authStore.onChange(() => {
     cookie.value = { token: pb.authStore.token, record: pb.authStore.record }
   })
 
-  try {
-    // get an up-to-date auth store state by verifying and refreshing the loaded auth model (if any)
-    pb.authStore.isValid && (await pb.collection('users').authRefresh())
-    // oxlint-disable-next-line no-unused-vars
-  } catch (_) {
-    // clear the auth store on failed refresh
-    pb.authStore.clear()
+  // Only try to refresh on client-side or if we have a valid token
+  if (pb.authStore.isValid) {
+    try {
+      // Get an up-to-date auth store state by verifying and refreshing the loaded auth model
+      await pb.collection('users').authRefresh()
+    } catch (error) {
+      // Clear the auth store on failed refresh
+      console.warn('Auth refresh failed:', error)
+      pb.authStore.clear()
+    }
   }
 
   return { provide: { pb } }

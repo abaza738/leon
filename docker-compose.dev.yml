@@ -1,0 +1,28 @@
+name: leon-dev
+
+services:
+  pocketbase:
+    build: ./pocketbase
+    ports:
+      - "8090:8090"
+    volumes:
+      - ./pocketbase/pb_data:/pb/pb_data
+      - ./pocketbase/pb_migrations:/pb/pb_migrations
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+      - "24678:24678"
+    environment:
+      - POCKETBASE_URL=http://localhost:8090
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    depends_on:
+      - pocketbase
+
+volumes:
+  pocketbase_data:

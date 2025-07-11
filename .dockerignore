@@ -1,0 +1,53 @@
+# Dependencies
+node_modules
+*/node_modules
+
+# Build outputs
+.nuxt
+.output
+dist
+build
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+logs
+
+# Runtime data
+pids
+*.pid
+
+# PocketBase data (should be in volume)
+pocketbase/pb_data
+
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+README*
+docs/
+
+# Editor files
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+.tmp
+
+# Docker files themselves
+**/Dockerfile*
+**/.dockerignore

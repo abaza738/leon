@@ -1,0 +1,27 @@
+name: leon
+
+services:
+  pocketbase:
+    build: ./pocketbase
+    ports:
+      - "8090:8090"
+    volumes:
+      - pocketbase_data:/pb/pb_data
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8090/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  client:
+    build: ./client
+    ports:
+      - "3000:3000"
+    environment:
+      - POCKETBASE_URL=http://pocketbase:8090
+    depends_on:
+      pocketbase:
+        condition: service_healthy
+
+volumes:
+  pocketbase_data:

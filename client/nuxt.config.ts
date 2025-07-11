@@ -16,7 +16,7 @@ export default defineNuxtConfig({
               // Style sources (adjust as needed for your app)
               "style-src 'self' 'unsafe-inline'",
               // Connect sources (for API calls, etc.)
-              "connect-src 'self' http://127.0.0.1:8090 http://localhost:8090 https://leon.up.railway.app https://accounts.google.com https://oauth2.googleapis.com https://www.googleapis.com", // Add any other API endpoints you connect to
+              "connect-src 'self' http://127.0.0.1:8090 http://localhost:8090 http://pocketbase:8090 https://leon.up.railway.app https://accounts.google.com https://oauth2.googleapis.com https://www.googleapis.com https://api.iconify.design", // Add any other API endpoints you connect to
               // Frame sources (for Google OAuth popups/iframes)
               "frame-src 'self' https://accounts.google.com",
               // Font sources
@@ -37,8 +37,8 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      pocketbaseUrl: process.env.POCKETBASE_URL || 'http://127.0.0.1:8090'
-    }
+      pocketbaseUrl: process.env.POCKETBASE_URL || 'http://127.0.0.1:8090',
+    },
   },
 
   css: ['~/assets/css/main.css'],
@@ -48,6 +48,14 @@ export default defineNuxtConfig({
   fonts: { families: [{ name: 'Onest', provider: 'google' }] },
 
   ui: { colorMode: false },
+
+  // Ensure proper SSR handling
+  ssr: false,
+
+  // Experimental features for better hydration
+  experimental: {
+    payloadExtraction: false, // Helps with auth state hydration
+  },
 
   compatibilityDate: '2024-11-27',
 })
