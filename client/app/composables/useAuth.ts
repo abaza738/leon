@@ -6,7 +6,6 @@ export const useAuth = () => {
   const user = ref(authStore.record)
   const token = ref(authStore.token)
 
-  // Computed avatar URL from PocketBase
   const avatarUrl = computed(() => {
     if (!user.value?.avatar || !user.value?.id) return null
     return $pb.files.getURL(user.value, user.value.avatar)
@@ -14,8 +13,6 @@ export const useAuth = () => {
 
   async function loginWithGoogle() {
     try {
-      // OAuth2 authentication with a single realtime call
-      // Make sure to register http://127.0.0.1:8090/api/oauth2-redirect as redirect url in Google Console
       const authData = await $pb
         .collection('users')
         .authWithOAuth2({ provider: 'google' })

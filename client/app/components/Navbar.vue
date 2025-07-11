@@ -37,7 +37,7 @@
 
 <script setup lang="ts">
 import type { DropdownMenuItem } from '@nuxt/ui'
-import { useAuth } from '~~/composables/useAuth'
+import { useAuth } from '~/composables/useAuth'
 
 const { logout, user, avatarUrl } = useAuth()
 

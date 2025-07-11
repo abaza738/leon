@@ -103,7 +103,7 @@
 </template>
 
 <script setup lang="ts">
-import { useAuth } from '~~/composables/useAuth'
+import { useAuth } from '~/composables/useAuth'
 
 definePageMeta({ layout: 'public', name: 'auth', middleware: 'public' })
 useHead({ titleTemplate: (t) => `${t} | Login` })

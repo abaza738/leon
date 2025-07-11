@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import { useAuth } from '~~/composables/useAuth'
+import { useAuth } from '~/composables/useAuth'
 
 definePageMeta({ layout: 'user', name: 'home', middleware: 'authenticated' })
 
