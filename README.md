@@ -2,6 +2,12 @@
 
 A modern restaurant management system built with Nuxt.js frontend and PocketBase backend, featuring Google OAuth authentication.
 
+## 🔗 Related Repositories & Deployment
+
+- **Backend Repository**: [leons-restaurant-backend](https://github.com/abdrizik/leons-restaurant-backend)
+- **Deployed App**: [https://leons-restaurant.up.railway.app/](https://leons-restaurant.up.railway.app/)
+- **Admin Dashboard**: [https://leons-restaurant.up.railway.app/\_/](https://leons-restaurant.up.railway.app/_/)
+
 ## Prerequisites
 
 - Node.js 18+
@@ -12,24 +18,22 @@ A modern restaurant management system built with Nuxt.js frontend and PocketBase
 1. **Install dependencies:**
 
    ```bash
-   pnpm client:install
+   pnpm install
    ```
 
 2. **Set up environment variables:**
 
    ```bash
-   cp client/.env.example client/.env
+   cp .env.example .env
    ```
 
-3. **Start PocketBase server**
+   Configure your `.env` file to point to either:
+   - Local PocketBase instance (if running backend locally)
+   - Production backend: `POCKETBASE_URL=https://leons-restaurant.up.railway.app`
 
+3. **Start the frontend:**
    ```bash
-   pnpm server:dev
-   ```
-
-4. **Start the frontend (in another terminal):**
-   ```bash
-   pnpm client:dev
+   pnpm dev
    ```
 
 ## 📁 Project Structure
@@ -41,15 +45,16 @@ leon/
 │   ├── composables/  # Vue composables (auth, etc.)
 │   ├── utils/        # Utilities
 │   └── .env         # Environment configuration
-├── pocketbase/       # PocketBase backend
 └── docs/            # Documentation
 ```
 
-## 🔐 Authentication Setup
+## 🔐 Authentication Setup _(Note: Only needed if setting up backend locally)_
 
 This project uses PocketBase with Google OAuth for authentication.
 
-### Local Google OAuth Configuration
+### Google OAuth Configuration
+
+For local development with Google OAuth:
 
 1. Follow the setup guide in `docs/google-oauth.md`
 2. Configure credentials in PocketBase admin panel:
@@ -58,13 +63,6 @@ This project uses PocketBase with Google OAuth for authentication.
    - Enter your Google Client ID and Secret
 
 **Important:** Register `http://127.0.0.1:8090/api/oauth2-redirect` as redirect URL in Google Cloud Console.
-
-## 🗄️ Database Schema
-
-- `users` - User accounts with roles (admin/customer)
-- `products` - Restaurant menu items
-- `orders` - Customer orders
-- `order_items` - Individual items within orders
 
 ## Local Development URLs
 
