@@ -7,21 +7,26 @@ export default defineNuxtConfig({
           'http-equiv': 'Content-Security-Policy',
           content:
             [
-              // Default sources (adjust as needed for your app)
+              // Default sources
               "default-src 'self'",
               // Allow images from your own domain and Google's user content domain
               "img-src 'self' data: http://127.0.0.1:8090 http://localhost:8090 https://leons-restaurant.up.railway.app/ https://lh3.googleusercontent.com",
-              // Script sources (adjust as needed for your app)
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // 'unsafe-inline' and 'unsafe-eval' are often needed for development and some libraries, but should be refined for production.
-              // Style sources (adjust as needed for your app)
+              // Script sources
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              // Style sources
               "style-src 'self' 'unsafe-inline'",
-              // Connect sources (for API calls, etc.)
-              "connect-src 'self' http://127.0.0.1:8090 http://localhost:8090 https://leons-restaurant.up.railway.app/ https://accounts.google.com https://oauth2.googleapis.com https://www.googleapis.com", // Add any other API endpoints you connect to
+              // Connect sources (for API calls)
+              "connect-src 'self' http://127.0.0.1:8090 http://localhost:8090 https://leons-restaurant.up.railway.app/ https://accounts.google.com https://oauth2.googleapis.com https://www.googleapis.com",
               // Frame sources (for Google OAuth popups/iframes)
               "frame-src 'self' https://accounts.google.com",
               // Font sources
               "font-src 'self' data:",
-            ].join('; ') + ';', // Join all directives with a semicolon
+            ].join('; ') + ';',
+        },
+        // Add Cross-Origin-Opener-Policy to help with OAuth popup issues
+        {
+          'http-equiv': 'Cross-Origin-Opener-Policy',
+          content: 'same-origin-allow-popups',
         },
       ],
       link: [
@@ -33,7 +38,7 @@ export default defineNuxtConfig({
     rootAttrs: { class: 'flex-1 flex flex-col bg-teal-100', id: 'leon' },
   },
 
-  modules: ['@nuxt/ui'],
+  modules: ['@nuxt/ui', '@vueuse/nuxt', '@pinia/nuxt'],
 
   runtimeConfig: {
     public: {
