@@ -10,7 +10,7 @@ export default defineNuxtPlugin(async () => {
     path: '/',
     secure: true,
     sameSite: 'strict',
-    httpOnly: false, // change to "true" if you want only server-side access
+    httpOnly: false,
     maxAge: 604800,
   })
 
@@ -24,11 +24,21 @@ export default defineNuxtPlugin(async () => {
 
   try {
     // get an up-to-date auth store state by verifying and refreshing the loaded auth model (if any)
-    pb.authStore.isValid && (await pb.collection('users').authRefresh())
+    if (pb.authStore.isValid) {
+      await pb.collection('users').authRefresh()
+    }
     // oxlint-disable-next-line no-unused-vars
-  } catch (_) {
-    // clear the auth store on failed refresh
-    pb.authStore.clear()
+  } catch (error: any) {
+    // Only clear auth store on actual auth errors, not network errors
+    if (error?.status === 401 || error?.status === 403) {
+      console.log('Auth token invalid, clearing auth store')
+      pb.authStore.clear()
+    } else {
+      console.log(
+        'Network error during auth refresh, keeping auth state:',
+        error,
+      )
+    }
   }
 
   return { provide: { pb } }
