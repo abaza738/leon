@@ -7,21 +7,39 @@
           <p class="text-gray-600 mt-1">Manage all restaurant orders</p>
         </div>
 
-        <div class="flex items-center gap-2">
-          <div
-            :class="[
-              'w-3 h-3 rounded-full',
-              isSubscribed ? 'bg-green-500 animate-pulse' : 'bg-red-500',
-            ]"
-          ></div>
-          <span
-            :class="[
-              'text-sm font-medium',
-              isSubscribed ? 'text-green-700' : 'text-red-700',
-            ]"
+        <div class="flex items-center gap-4">
+          <!-- Sound Control -->
+          <UButton
+            @click="toggleMute"
+            variant="outline"
+            size="sm"
+            :color="isMuted ? 'error' : 'success'"
+            class="flex items-center gap-2"
           >
-            {{ isSubscribed ? 'Real-time Connected' : 'Disconnected' }}
-          </span>
+            <UIcon
+              :name="isMuted ? 'i-lucide-volume-x' : 'i-lucide-volume-2'"
+              class="w-4 h-4"
+            />
+            <span class="text-xs">{{ isMuted ? 'Muted' : 'Sound On' }}</span>
+          </UButton>
+
+          <!-- Connection Status -->
+          <div class="flex items-center gap-2">
+            <div
+              :class="[
+                'w-3 h-3 rounded-full',
+                isSubscribed ? 'bg-green-500 animate-pulse' : 'bg-red-500',
+              ]"
+            ></div>
+            <span
+              :class="[
+                'text-sm font-medium',
+                isSubscribed ? 'text-green-700' : 'text-red-700',
+              ]"
+            >
+              {{ isSubscribed ? 'Real-time Connected' : 'Disconnected' }}
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -272,9 +290,13 @@
 import { h, resolveComponent } from 'vue'
 import type { Order, OrderItem } from '~/types/restaurant'
 import type { TableColumn } from '@nuxt/ui'
+import { useNotificationSound } from '~/composables/useNotificationSound'
 
 definePageMeta({ layout: 'admin', middleware: 'admin' })
 useHead({ titleTemplate: (t) => `${t} | Admin - Orders` })
+
+// Sound notification system
+const { isMuted, play, playTest, toggleMute } = useNotificationSound()
 
 const {
   orders,
@@ -286,7 +308,7 @@ const {
   getOrderStatusColor,
   getOrderStatusText,
   isSubscribed,
-} = useAdminOrders()
+} = useAdminOrders(play)
 
 const toast = useToast()
 

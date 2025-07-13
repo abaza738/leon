@@ -1,6 +1,6 @@
 import type { Order, OrderItem } from '~/types/restaurant'
 
-export const useAdminOrders = () => {
+export const useAdminOrders = (onNewOrder?: () => void) => {
   const { $pb } = useNuxtApp()
   const toast = useToast()
 
@@ -30,6 +30,8 @@ export const useAdminOrders = () => {
             description: 'Order received',
             color: 'info',
           })
+          // Play sound notification
+          onNewOrder?.()
           break
         case 'update':
           toast.add({
