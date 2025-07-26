@@ -1,359 +1,118 @@
 <template>
-  <div class="min-h-screen bg-default">
-    <!-- Hero Section -->
-    <div class="">
-      <div class="container px-4 py-8">
-        <h1 class="text-3xl font-bold text-highlighted mb-2"
-          >Welcome to Leon's Restaurant</h1
-        >
-        <p class="text-muted mb-4">Fresh ingredients, bold flavors</p>
-        <div
-          v-if="user"
-          class="text-sm text-toned"
-        >
-          Hello, {{ user.name }}! 👋
-        </div>
-      </div>
-    </div>
-
-    <LoadingState
-      v-if="loading"
-      message="Loading menu..."
-    />
-
-    <!-- Error State -->
-    <div
-      v-else-if="error"
-      class="container mx-auto px-4 py-6"
-    >
-      <UAlert
-        icon="i-lucide-alert-circle"
-        color="error"
-        variant="soft"
-        :title="error.message"
+  <main class="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="flex items-baseline justify-between border-b border-gray-200 pt-24 pb-6">
+      <h1 class="text-4xl font-bold tracking-tight text-gray-900">Menu</h1>
+      <SortDropdown
+        v-model="selectedSort"
+        :sort-options="SORT_OPTIONS"
       />
     </div>
 
-    <!-- Menu Content -->
-    <div
-      v-else
-      class="container mx-auto px-4 py-6"
-    >
-      <!-- Category Filter -->
-      <div class="mb-6 flex items-center justify-between gap-4">
-        <div class="flex items-center gap-2 overflow-x-auto pb-2 flex-1">
-          <UButton
-            @click="selectedCategory = null"
-            :variant="selectedCategory === null ? 'solid' : 'outline'"
-            :color="selectedCategory === null ? 'success' : 'neutral'"
-            size="sm"
-          >
-            All
-          </UButton>
-          <UButton
-            v-for="category in categories"
-            :key="category"
-            @click="selectedCategory = category"
-            :variant="selectedCategory === category ? 'solid' : 'outline'"
-            :color="selectedCategory === category ? 'success' : 'neutral'"
-            size="sm"
-          >
-            {{ category }}
-          </UButton>
+    <!-- Content -->
+    <section class="pt-6 pb-24">
+      <h2
+        id="products-heading"
+        class="sr-only"
+        >Products</h2
+      >
+
+      <!-- Loading State -->
+      <LoadingState
+        v-if="loading"
+        message="Loading menu..."
+      />
+
+      <!-- Error State -->
+      <div
+        v-else-if="error"
+        class="text-center py-16"
+      >
+        <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+          <AlertCircleIcon class="w-10 h-10 text-red-500" />
         </div>
-
-        <UButton
-          v-if="cartItems?.length > 0"
-          @click="handleClearCart"
-          color="neutral"
-          variant="outline"
-          size="sm"
-          :loading="clearingCart"
-        >
-          <UIcon
-            name="i-lucide-trash-2"
-            class="mr-2"
-          />
-          Empty Cart
-        </UButton>
+        <h2 class="text-xl font-bold mb-2">Failed to load menu</h2>
+        <p class="text-gray-600 mb-8">{{ error.message }}</p>
       </div>
 
-      <!-- Compact Products Grid -->
+      <!-- Main Content -->
       <div
-        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+        v-else
+        class="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-4"
       >
-        <UCard
-          v-for="product in filteredProducts"
-          :key="product.id"
-          class="group hover:shadow-md transition-all duration-200"
-          :ui="{ body: 'p-4' }"
-        >
-          <!-- Product Image -->
-          <div
-            class="aspect-square bg-muted relative overflow-hidden rounded-lg mb-3"
-          >
-            <img
-              v-if="product.image"
-              :src="getProductImageUrl(product)"
-              :alt="product.name"
-              class="w-full h-full object-cover"
-            />
-            <div
-              v-else
-              class="w-full h-full flex items-center justify-center"
-            >
-              <UIcon
-                name="i-lucide-image"
-                class="w-8 h-8 text-muted"
-              />
-            </div>
-          </div>
-
-          <!-- Product Info -->
-          <div class="space-y-2">
-            <h3 class="font-semibold text-highlighted text-sm">{{
-              product.name
-            }}</h3>
-            <p class="text-xs text-muted line-clamp-2">{{
-              product.description
-            }}</p>
-
-            <div class="flex items-center justify-between pt-1">
-              <span class="font-bold text-lg text-success"
-                >{{ product.price.toFixed(2) }} JD</span
-              >
-
-              <div class="flex items-center gap-2">
-                <!-- Cart quantity controls (for items already in cart) -->
-                <div
-                  v-if="getCartQuantity(product.id) > 0"
-                  class="flex items-center gap-1"
-                >
-                  <span class="text-xs text-muted mr-2">
-                    In cart: {{ getCartQuantity(product.id) }}
-                  </span>
-                  <UButton
-                    @click="decrementCartQuantity(product.id)"
-                    variant="solid"
-                    color="neutral"
-                    size="xs"
-                    square
-                    icon="i-lucide-minus"
-                    :loading="isProductLoading(product.id)"
-                  />
-                  <UButton
-                    @click="incrementCartQuantity(product.id)"
-                    variant="solid"
-                    color="success"
-                    size="xs"
-                    square
-                    icon="i-lucide-plus"
-                    :loading="isProductLoading(product.id)"
-                  />
-                </div>
-
-                <!-- New item quantity controls (for items not in cart) -->
-                <div
-                  v-else
-                  class="flex items-center gap-1"
-                >
-                  <UButton
-                    @click="decrementLocalQuantity(product.id)"
-                    variant="solid"
-                    color="neutral"
-                    size="xs"
-                    square
-                    icon="i-lucide-minus"
-                  />
-                  <span
-                    class="min-w-[1.5rem] text-center text-sm font-bold text-highlighted"
-                  >
-                    {{ getLocalQuantity(product.id) }}
-                  </span>
-                  <UButton
-                    @click="incrementLocalQuantity(product.id)"
-                    variant="solid"
-                    color="success"
-                    size="xs"
-                    square
-                    icon="i-lucide-plus"
-                  />
-                  <UButton
-                    @click="handleAddToCart(product)"
-                    :disabled="product.status !== 'available'"
-                    variant="solid"
-                    color="success"
-                    size="xs"
-                    :loading="isProductLoading(product.id)"
-                  >
-                    Add {{ getLocalQuantity(product.id) }}
-                  </UButton>
-                </div>
-              </div>
-            </div>
-          </div>
-        </UCard>
-      </div>
-
-      <!-- Empty State -->
-      <div
-        v-if="filteredProducts?.length === 0"
-        class="text-center py-12"
-      >
-        <UIcon
-          name="i-lucide-search"
-          class="w-12 h-12 text-muted mx-auto mb-3"
+        <CategoryFilters
+          :categories="categoryNames"
+          v-model:selected-category="selectedCategory"
         />
-        <h3 class="font-medium text-highlighted mb-1">No items found</h3>
-        <p class="text-sm text-muted">Try a different category</p>
+        <ProductGrid :products="sortedAndFilteredProducts" />
       </div>
-    </div>
-  </div>
+    </section>
+  </main>
 </template>
 
 <script setup lang="ts">
-import { useAuth } from '~/composables/useAuth'
-import { useProducts } from '~/composables/useProducts'
-import type { Product } from '~/types/restaurant'
+import {AlertCircleIcon} from 'lucide-vue-next'
+import {useProducts} from '~/composables/useProducts'
+import {useCategories} from '~/composables/useCategories'
+import {SORT_OPTIONS} from '~/constants/sort-options'
 
-definePageMeta({ layout: 'user', name: 'home', middleware: 'authenticated' })
-useHead({ titleTemplate: (t) => `${t} | Menu` })
+definePageMeta({layout: 'user', middleware: 'authenticated'})
+useHead({titleTemplate: (t) => `${t} | Menu`})
 
-const { user } = useAuth()
-const { products, categories, loading, error, getProductImageUrl } =
-  useProducts()
-const cartStore = useCartStore()
-const { addToCart, updateQuantity } = cartStore
+const route = useRoute()
+const router = useRouter()
 
-// Create a reactive reference to cart items
-const cartItems = computed(() => cartStore.cartItems)
-const toast = useToast()
-
-const selectedCategory = ref<string | null>(null)
-const loadingProducts = ref<Set<string>>(new Set())
-const clearingCart = ref(false)
-const localQuantities = ref<Map<string, number>>(new Map())
-
-const filteredProducts = computed(() => {
-  if (!selectedCategory.value) return products.value
-  return products.value?.filter((p) => p.category === selectedCategory.value)
+// Query parameter reactive state
+const selectedCategory = computed({
+  get: () => (route.query.category as string) || null,
+  set: (value: string | null) => {
+    router.push({query: {...route.query, category: value || undefined}})
+  }
 })
 
-function getCartQuantity(productId: string): number {
-  if (!cartItems.value || !Array.isArray(cartItems.value)) return 0
-  const item = cartItems.value.find(
-    (item: any) => item.product.id === productId,
-  )
-  return item?.quantity || 0
-}
-
-function getLocalQuantity(productId: string): number {
-  return localQuantities.value.get(productId) || 1
-}
-
-function incrementLocalQuantity(productId: string) {
-  const current = getLocalQuantity(productId)
-  localQuantities.value.set(productId, current + 1)
-}
-
-function decrementLocalQuantity(productId: string) {
-  const current = getLocalQuantity(productId)
-  if (current > 1) {
-    localQuantities.value.set(productId, current - 1)
-  }
-}
-
-function isProductLoading(productId: string): boolean {
-  return loadingProducts.value.has(productId)
-}
-
-async function handleAddToCart(product: Product) {
-  const quantity = getLocalQuantity(product.id)
-  loadingProducts.value.add(product.id)
-
-  try {
-    addToCart(product, quantity) // Remove await - it's synchronous now
-    // Clear local quantity after successful add
-    localQuantities.value.delete(product.id)
-
-    toast.add({
-      title: 'Added to Cart',
-      description: `${product.name} ${quantity > 1 ? `(${quantity})` : ''} has been added to your cart`,
-      icon: 'i-lucide-check-circle',
-      color: 'success',
+const selectedSort = computed({
+  get: () => (route.query.sort as string) || 'name',
+  set: (value: string) => {
+    router.push({
+      query: {...route.query, sort: value === 'name' ? undefined : value}
     })
-  } catch (error) {
-    toast.add({
-      title: 'Error',
-      description: 'Failed to add to cart. Please try again.',
-      icon: 'i-lucide-alert-circle',
-      color: 'error',
-    })
-  } finally {
-    loadingProducts.value.delete(product.id)
   }
-}
+})
 
-function incrementCartQuantity(productId: string) {
-  const currentQuantity = getCartQuantity(productId)
-  if (currentQuantity > 0) {
-    loadingProducts.value.add(productId)
-    try {
-      updateQuantity(productId, currentQuantity + 1) // Remove await - it's synchronous
-      // No need for refresh() - Pinia is reactive
-    } catch (error) {
-      toast.add({
-        title: 'Error',
-        description: 'Failed to update cart. Please try again.',
-        icon: 'i-lucide-alert-circle',
-        color: 'error',
+// Data fetching
+const {products, loading: productsLoading, error} = useProducts()
+const {categories, loading: categoriesLoading} = useCategories()
+
+// Computed properties
+const loading = computed(() => productsLoading.value || categoriesLoading.value)
+const categoryNames = computed(() => categories.value?.map((cat) => cat.name) || [])
+
+const filteredProducts = computed(() => {
+  if (!selectedCategory.value || !products.value) return products.value
+
+  const categoryId = categories.value?.find((cat) => cat.name === selectedCategory.value)?.id
+  return products.value.filter((product) => product.category === categoryId)
+})
+
+const sortedAndFilteredProducts = computed(() => {
+  if (!filteredProducts.value) return []
+
+  const sorted = [...filteredProducts.value]
+
+  switch (selectedSort.value) {
+    case 'price_asc':
+      return sorted.sort((a, b) => a.base_price - b.base_price)
+    case 'price_desc':
+      return sorted.sort((a, b) => b.base_price - a.base_price)
+    case 'category':
+      return sorted.sort((a, b) => {
+        const aCat = categories.value?.find((c) => c.id === a.category)?.name || a.category
+        const bCat = categories.value?.find((c) => c.id === b.category)?.name || b.category
+        return aCat.localeCompare(bCat)
       })
-    } finally {
-      loadingProducts.value.delete(productId)
-    }
+    case 'name':
+    default:
+      return sorted.sort((a, b) => a.name.localeCompare(b.name))
   }
-}
-
-function decrementCartQuantity(productId: string) {
-  const currentQuantity = getCartQuantity(productId)
-  if (currentQuantity > 1) {
-    loadingProducts.value.add(productId)
-    try {
-      updateQuantity(productId, currentQuantity - 1) // Remove await - it's synchronous
-      // No need for refresh() - Pinia is reactive
-    } catch (error) {
-      toast.add({
-        title: 'Error',
-        description: 'Failed to update cart. Please try again.',
-        icon: 'i-lucide-alert-circle',
-        color: 'error',
-      })
-    } finally {
-      loadingProducts.value.delete(productId)
-    }
-  }
-}
-
-function handleClearCart() {
-  clearingCart.value = true
-  try {
-    cartStore.clearCart() // Remove await - it's synchronous
-    toast.add({
-      title: 'Cart Cleared',
-      description: 'All items have been removed from your cart',
-      icon: 'i-lucide-check-circle',
-      color: 'success',
-    })
-  } catch (err: any) {
-    console.error('Error clearing cart:', err)
-    toast.add({
-      title: 'Error',
-      description: 'Failed to clear cart. Please try again.',
-      icon: 'i-lucide-alert-circle',
-      color: 'error',
-    })
-  } finally {
-    clearingCart.value = false
-  }
-}
+})
 </script>

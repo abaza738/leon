@@ -1,264 +1,431 @@
 <template>
-  <div class="p-6">
-    <div class="max-w-4xl mx-auto">
+  <div class="bg-white">
+    <div class="mx-auto max-w-2xl px-4 pt-16 pb-24 sm:px-6 lg:max-w-7xl lg:px-8">
+      <!-- Back button -->
       <div class="mb-8">
-        <UButton
-          @click="navigateTo('/')"
-          variant="ghost"
-          color="neutral"
-          size="sm"
-          class="mb-4"
+        <NuxtLink
+          to="/"
+          class="flex gap-2 items-center"
         >
-          <UIcon
-            name="i-lucide-arrow-left"
-            class="mr-2"
-          />
+          <ChevronLeftIcon class="h-4 w-4" />
           Back to Menu
-        </UButton>
-        <h1 class="text-2xl font-bold mb-2">Checkout</h1>
-        <p class="text-gray-600"
-          >Review your order and complete your purchase</p
-        >
+        </NuxtLink>
       </div>
 
+      <h1 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"> Shopping Cart </h1>
+
+      <!-- Loading State -->
       <LoadingState
-        v-if="isSubmitting"
+        v-if="isSubmitting && !orderSuccess"
         message="Processing your order..."
       />
 
+      <!-- Success Modal -->
       <div
-        v-else-if="orderSuccess"
-        class="text-center py-16"
+        v-if="orderSuccess"
+        class="relative z-10"
+        aria-labelledby="modal-title"
+        role="dialog"
+        aria-modal="true"
       >
         <div
-          class="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4"
-        >
-          <UIcon
-            name="i-lucide-check-circle"
-            class="w-10 h-10 text-green-500"
-          />
-        </div>
-        <h2 class="text-2xl font-bold mb-2">Order Placed!</h2>
-        <p class="text-gray-600 mb-8"
-          >Your order will be ready in 30-45 minutes</p
-        >
+          class="fixed inset-0 bg-gray-500/75 transition-opacity"
+          aria-hidden="true"
+        ></div>
 
-        <div class="flex gap-4 justify-center">
-          <UButton
-            @click="navigateTo('/orders')"
-            color="primary"
-            >View Orders</UButton
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+          <div
+            class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0"
           >
-          <UButton
-            @click="navigateTo('/')"
-            variant="outline"
-            >Continue Shopping</UButton
-          >
+            <div
+              class="relative transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-sm sm:p-6"
+            >
+              <div>
+                <div
+                  class="mx-auto flex size-12 items-center justify-center rounded-full bg-green-100"
+                >
+                  <CheckIcon class="size-6 text-green-600" />
+                </div>
+                <div class="mt-3 text-center sm:mt-5">
+                  <h3
+                    id="modal-title"
+                    class="text-base font-semibold text-gray-900"
+                  >
+                    Order Placed Successfully!
+                  </h3>
+                  <div class="mt-2">
+                    <p class="text-sm text-gray-500">
+                      Your order {{ formatId(fullOrderId) }} has been placed and will be ready in
+                      30-45 minutes.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-5 sm:mt-6 space-y-3">
+                <Button
+                  @click="navigateTo(`/orders/${fullOrderId}`)"
+                  variant="primary"
+                  size="lg"
+                  class="w-full"
+                >
+                  Track Order
+                </Button>
+                <Button
+                  @click="navigateTo('/')"
+                  variant="secondary"
+                  size="lg"
+                  class="w-full"
+                >
+                  Continue Shopping
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
+      <!-- Empty Cart State -->
       <div
         v-else-if="!hasItems"
         class="flex flex-col items-center justify-center py-20"
       >
-        <UIcon
-          name="i-lucide-shopping-cart"
-          class="w-20 h-20 text-gray-400 mb-6"
-        />
+        <ShoppingCartIcon class="w-20 h-20 text-gray-400 mb-6" />
         <h2 class="text-2xl font-bold mb-3">Your cart is empty</h2>
-        <p class="text-gray-600 mb-8 text-lg"
-          >Add some delicious items to get started</p
-        >
-        <UButton
+        <p class="text-gray-600 mb-8 text-lg">Add some delicious items to get started</p>
+        <Button
           @click="navigateTo('/')"
-          color="primary"
-          size="lg"
+          variant="primary"
+          size="xl"
         >
-          <UIcon
-            name="i-lucide-utensils"
-            class="mr-2"
-          />
+          <PlusIcon class="h-5 w-5" />
           Browse Menu
-        </UButton>
+        </Button>
       </div>
 
-      <div
-        v-else
-        class="grid grid-cols-1 lg:grid-cols-3 gap-8"
+      <!-- Cart Content -->
+      <form
+        v-else-if="!isSubmitting"
+        class="mt-12 lg:grid lg:grid-cols-12 lg:items-start lg:gap-x-12 xl:gap-x-16"
+        @submit.prevent="handleSubmit"
       >
-        <div class="lg:col-span-2">
-          <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xl font-semibold">Your Order</h2>
-            <UButton
-              @click="handleClearCart"
-              variant="ghost"
-              size="sm"
-              class="text-red-500 hover:text-red-600 hover:bg-red-50"
-            >
-              <UIcon
-                name="i-lucide-trash-2"
-                class="mr-1"
-              />
-              Clear Cart
-            </UButton>
-          </div>
+        <section
+          aria-labelledby="cart-heading"
+          class="lg:col-span-7"
+        >
+          <h2
+            id="cart-heading"
+            class="sr-only"
+            >Items in your shopping cart</h2
+          >
 
-          <div class="space-y-4">
-            <div
+          <ul
+            role="list"
+            class="divide-y divide-gray-200 border-t border-b border-gray-200"
+          >
+            <li
               v-for="item in cartStore.cartItems"
-              :key="item.product.id"
-              class="flex items-center gap-4 p-4 border rounded-lg bg-white shadow-sm"
+              :key="item.id"
+              class="flex py-6 sm:py-10"
             >
-              <img
-                v-if="getProductImageUrl(item.product)"
-                :src="getProductImageUrl(item.product)"
-                :alt="item.product.name"
-                class="w-16 h-16 object-cover rounded-lg"
-              />
-              <div
-                v-else
-                class="flex items-center justify-center"
-              >
-                <UIcon
-                  name="i-lucide-image"
-                  class="w-8 h-8 text-muted"
+              <div class="shrink-0">
+                <img
+                  v-if="
+                    item.expand?.product?.image &&
+                    getFileUrl(item.expand.product, item.expand.product.image)
+                  "
+                  :src="getFileUrl(item.expand.product, item.expand.product.image)"
+                  :alt="item.expand?.product?.name || 'Product'"
+                  class="size-24 rounded-md object-cover sm:size-48"
                 />
-              </div>
-              <div class="flex-1">
-                <h4 class="font-medium text-gray-900">{{
-                  item.product.name
-                }}</h4>
-                <p class="text-sm text-gray-600">
-                  {{ item.quantity }} × {{ item.product.price.toFixed(2) }} JD
-                </p>
-              </div>
-              <div class="text-right">
-                <p class="font-bold text-emerald-600 text-lg">
-                  {{ (item.product.price * item.quantity).toFixed(2) }} JD
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="lg:col-span-1">
-          <div class="bg-gray-50 rounded-lg p-6 sticky top-6">
-            <h2 class="text-xl font-semibold mb-6">Order Summary</h2>
-
-            <div class="space-y-4 mb-6">
-              <div class="flex justify-between text-lg">
-                <span>Subtotal:</span>
-                <span>{{ cartStore.cartTotal.toFixed(2) }} JD</span>
-              </div>
-              <div class="border-t pt-4">
-                <div class="flex justify-between text-xl font-bold">
-                  <span>Total:</span>
-                  <span class="text-emerald-600"
-                    >{{ cartStore.cartTotal.toFixed(2) }} JD</span
-                  >
+                <div
+                  v-else
+                  class="size-24 sm:size-48 bg-gray-200 rounded-md flex items-center justify-center"
+                >
+                  <ImageIcon class="w-8 h-8 text-gray-400" />
                 </div>
               </div>
-            </div>
 
-            <UForm
-              :state="orderForm"
-              @submit="handleSubmit"
-              class="space-y-6"
-            >
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                  Special Instructions (optional)
-                </label>
-                <UTextarea
-                  v-model="orderForm.notes"
-                  placeholder="Any special requests or dietary requirements..."
-                  :rows="3"
-                  class="w-full mb-4"
-                />
+              <div class="ml-4 flex flex-1 flex-col justify-between sm:ml-6">
+                <div class="relative pr-9 sm:grid sm:grid-cols-2 sm:gap-x-6 sm:pr-0">
+                  <div>
+                    <div class="flex justify-between">
+                      <h3 class="text-sm">
+                        <NuxtLink
+                          :to="`/products/${item.product}`"
+                          class="font-medium text-gray-700 hover:text-indigo-600 transition-colors cursor-pointer"
+                        >
+                          {{ item.expand?.product?.name || 'Unknown Product' }}
+                        </NuxtLink>
+                      </h3>
+                    </div>
+                    <div class="mt-1 flex text-sm">
+                      <p class="text-gray-500">{{
+                        item.expand?.product?.description || 'No description available'
+                      }}</p>
+                    </div>
+
+                    <!-- Addons -->
+                    <div
+                      v-if="item.selected_addons && Object.keys(item.selected_addons).length > 0"
+                      class="mt-2"
+                    >
+                      <p class="text-xs text-gray-600 font-medium mb-1">Customizations:</p>
+                      <!-- Detailed customizations list -->
+                      <ul class="text-xs text-gray-600 space-y-0.5 pl-2">
+                        <template
+                          v-for="(addons, groupId) in item.selected_addons"
+                          :key="groupId"
+                        >
+                          <li
+                            v-for="addon in addons"
+                            v-show="addon && typeof addon === 'object' && 'name' in addon"
+                            :key="addon.id"
+                            class="flex justify-between"
+                          >
+                            <span class="font-medium">{{ addon.name }}</span>
+                            <span
+                              class="font-medium"
+                              :class="{
+                                'text-indigo-600': addon.price > 0,
+                                'text-green-600': addon.price === 0
+                              }"
+                            >
+                              {{ addon.price > 0 ? `+${formatPrice(addon.price)}` : 'FREE' }}
+                            </span>
+                          </li>
+                        </template>
+                      </ul>
+                    </div>
+
+                    <div class="mt-1">
+                      <div class="text-xs text-gray-600">
+                        <!-- Show base price -->
+                        <template v-if="item.quantity > 0">
+                          {{ formatPrice(item.expand?.product?.base_price || 0) }}
+                          × {{ item.quantity }}
+                        </template>
+                      </div>
+                      <div
+                        v-if="
+                          item.item_total > (item.expand?.product?.base_price || 0) * item.quantity
+                        "
+                        class="text-xs text-gray-500"
+                      >
+                        +{{
+                          formatPrice(
+                            item.item_total -
+                              (item.expand?.product?.base_price || 0) * item.quantity
+                          )
+                        }}
+                        customizations
+                      </div>
+                      <p class="text-sm font-medium text-gray-900">
+                        {{ formatPrice(item.item_total) }} total
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="mt-4 sm:mt-0 sm:pr-9">
+                    <div class="grid w-full max-w-16 grid-cols-1">
+                      <select
+                        :key="`${item.id}-${item.quantity}`"
+                        :value="item.quantity"
+                        @change="
+                          updateQuantity(
+                            item.id,
+                            parseInt(($event.target as HTMLSelectElement).value)
+                          )
+                        "
+                        :aria-label="`Quantity, ${item.expand?.product?.name || 'Product'}`"
+                        class="col-start-1 row-start-1 appearance-none rounded-md bg-white py-1.5 pr-8 pl-3 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                      >
+                        <option
+                          v-for="n in Math.max(10, item.quantity + 2)"
+                          :key="n"
+                          :value="n"
+                          :selected="n === item.quantity"
+                        >
+                          {{ n }}
+                        </option>
+                      </select>
+                      <ChevronDownIcon
+                        class="pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end text-gray-500 sm:size-4"
+                      />
+                    </div>
+
+                    <div class="absolute top-0 right-0">
+                      <button
+                        type="button"
+                        @click="removeItem(item.id)"
+                        class="text-red-400 hover:text-red-500"
+                      >
+                        <span class="sr-only">Remove</span>
+                        <XIcon class="size-5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
+            </li>
+          </ul>
+        </section>
 
-              <UButton
-                type="submit"
-                color="primary"
-                size="lg"
-                block
-                :loading="isSubmitting"
-                :disabled="!hasItems"
-              >
-                <UIcon
-                  name="i-lucide-credit-card"
-                  class="mr-2"
-                />
-                Place Order
-              </UButton>
-            </UForm>
+        <!-- Order summary -->
+        <section
+          aria-labelledby="summary-heading"
+          class="mt-16 rounded-lg bg-gray-50 px-4 py-6 sm:p-6 lg:col-span-5 lg:mt-0 lg:p-8"
+        >
+          <h2
+            id="summary-heading"
+            class="text-lg font-medium text-gray-900"
+          >
+            Order summary
+          </h2>
+
+          <dl class="mt-6 space-y-4">
+            <!-- <div class="flex items-center justify-between">
+              <dt class="text-sm text-gray-600">Base items subtotal</dt>
+              <dd class="text-sm font-medium text-gray-900">
+                {{ formatPrice(priceBreakdown.baseTotal) }}
+              </dd>
+            </div> -->
+
+            <div class="flex items-center justify-between">
+              <dt class="text-base font-medium text-gray-900">Order total</dt>
+              <dd class="text-base font-medium text-gray-900">
+                {{ formatPrice(priceBreakdown.grandTotal) }}
+              </dd>
+            </div>
+          </dl>
+
+          <!-- Special Instructions -->
+          <div class="mt-6">
+            <label
+              for="notes"
+              class="block text-sm/6 font-medium text-gray-900 mb-2"
+            >
+              Special Instructions (optional)
+            </label>
+            <textarea
+              id="notes"
+              v-model="orderForm.notes"
+              placeholder="Any special requests or dietary requirements..."
+              rows="3"
+              class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+            />
           </div>
-        </div>
-      </div>
+
+          <div class="mt-6">
+            <Button
+              type="submit"
+              :disabled="!hasItems || isSubmitting"
+              variant="primary"
+              size="lg"
+              class="w-full"
+            >
+              <span v-if="isSubmitting"> Processing... </span>
+              <span v-else>Place Order</span>
+            </Button>
+          </div>
+
+          <!-- Clear Cart Button -->
+          <div class="mt-4">
+            <Button
+              @click="handleClearCart"
+              variant="secondary"
+              size="lg"
+              class="w-full"
+            >
+              Clear Cart
+            </Button>
+          </div>
+        </section>
+      </form>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useAuth } from '~/composables/useAuth'
-import { useOrders } from '~/composables/useOrders'
-import { useProducts } from '~/composables/useProducts'
+import Button from '~/components/ui/Button.vue'
+import {formatPrice, formatId} from '~/utils/format'
+import {calculateCustomizationsTotal, getAddonDisplayText} from '~/utils/calculations'
+import {
+  ChevronLeftIcon,
+  ImageIcon,
+  ShoppingCartIcon,
+  PlusIcon,
+  ChevronDownIcon,
+  XIcon,
+  CheckIcon
+} from 'lucide-vue-next'
 
 definePageMeta({
   layout: 'user',
   name: 'checkout',
-  middleware: 'authenticated',
+  middleware: 'authenticated'
 })
 
-useHead({ title: 'Checkout' })
+useHead({title: 'Checkout'})
 
-const { user } = useAuth()
 const cartStore = useCartStore()
-const { createOrder } = useOrders()
-const { getProductImageUrl } = useProducts()
-const toast = useToast()
+const ordersStore = useOrdersStore()
+
+// Function to get addon display text
+const getAddonDisplay = getAddonDisplayText
 
 const isSubmitting = ref(false)
 const orderSuccess = ref(false)
-const orderForm = ref({ notes: '' })
+const orderForm = ref({notes: ''})
+const fullOrderId = ref('')
 
 const hasItems = computed(() => cartStore.cartItems?.length > 0)
+
+// Calculate price breakdown using utility
+const priceBreakdown = computed(() => calculateCustomizationsTotal(cartStore.cartItems || []))
+
+const updateQuantity = async (cartItemId: string, quantity: number) => {
+  try {
+    await cartStore.updateQuantity(cartItemId, quantity)
+  } catch (error) {
+    console.error('Error updating quantity:', error)
+  }
+}
+
+const removeItem = async (cartItemId: string) => {
+  try {
+    await cartStore.removeItem(cartItemId)
+  } catch (error) {
+    console.error('Error removing item:', error)
+  }
+}
 
 async function handleSubmit() {
   if (!hasItems.value) return
 
   isSubmitting.value = true
+
   try {
-    await createOrder(
+    const order = await ordersStore.createOrder(
       [...cartStore.cartItems],
-      orderForm.value.notes?.trim() || '',
+      orderForm.value.notes?.trim() || ''
     )
+
+    fullOrderId.value = order.id
+
     await cartStore.clearCart()
-
-    toast.add({
-      title: 'Order Placed!',
-      description: 'Your order has been received',
-      color: 'success',
-    })
-
     orderSuccess.value = true
   } catch (err: any) {
-    toast.add({
-      title: 'Order Failed',
-      description: err?.message || 'Please try again',
-      color: 'error',
-    })
+    console.error('Order creation failed:', err)
   } finally {
     isSubmitting.value = false
   }
 }
 
-function handleClearCart() {
+async function handleClearCart() {
   try {
-    cartStore.clearCart()
-    toast.add({ title: 'Cart Cleared', color: 'success' })
+    await cartStore.clearCart()
   } catch (err: any) {
-    toast.add({ title: 'Error clearing cart', color: 'error' })
+    console.error('Error clearing cart:', err)
   }
 }
 </script>
