@@ -1,5 +1,6 @@
 <template>
   <div class="flex-1 flex flex-col">
+    <AnnouncementBanner />
     <Navbar />
     <div class="flex-1 flex flex-col">
       <slot />

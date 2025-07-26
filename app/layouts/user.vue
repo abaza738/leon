@@ -1,9 +1,11 @@
 <template>
-  <div class="flex-1 flex flex-col">
+  <div class="grid grid-rows-[auto_auto_1fr_auto] min-h-screen">
+    <AnnouncementBanner />
     <Navbar />
-    <div class="flex-1 flex flex-col">
+    <div class="flex flex-col">
       <slot />
     </div>
+    <Footer />
   </div>
 </template>
 
