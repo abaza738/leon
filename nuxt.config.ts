@@ -1,4 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import tailwindcss from '@tailwindcss/vite'
+
 export default defineNuxtConfig({
   app: {
     head: {
@@ -20,39 +22,33 @@ export default defineNuxtConfig({
               // Frame sources (for Google OAuth popups/iframes)
               "frame-src 'self' https://accounts.google.com",
               // Font sources
-              "font-src 'self' data:",
-            ].join('; ') + ';',
+              "font-src 'self' data:"
+            ].join('; ') + ';'
         },
         // Add Cross-Origin-Opener-Policy to help with OAuth popup issues
         {
           'http-equiv': 'Cross-Origin-Opener-Policy',
-          content: 'same-origin-allow-popups',
-        },
+          content: 'same-origin-allow-popups'
+        }
       ],
       link: [
-        { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
-        { rel: 'icon', type: 'image/png', href: '/favicon.png' },
-      ],
-    },
-    rootTag: 'main',
-    rootAttrs: { class: 'flex-1 flex flex-col bg-teal-100', id: 'leon' },
+        {rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg'},
+        {rel: 'icon', type: 'image/png', href: '/favicon.png'}
+      ]
+    }
   },
 
-  modules: ['@nuxt/ui', '@vueuse/nuxt', '@pinia/nuxt'],
+  modules: ['@vueuse/nuxt', '@pinia/nuxt'],
 
   runtimeConfig: {
     public: {
-      pocketbaseUrl: process.env.POCKETBASE_URL || 'http://127.0.0.1:8090',
-    },
+      pocketbaseUrl: process.env.POCKETBASE_URL || 'http://127.0.0.1:8090'
+    }
   },
 
   css: ['~/assets/css/main.css'],
 
-  future: { compatibilityVersion: 4 },
-
-  fonts: { families: [{ name: 'Onest', provider: 'google' }] },
-
-  ui: { colorMode: false },
-
   compatibilityDate: '2024-11-27',
+
+  vite: {plugins: [tailwindcss()]}
 })

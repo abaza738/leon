@@ -1,13 +1,23 @@
 <template>
-  <UApp>
-    <div class="container mx-auto max-w-7xl">
+  <div class="container mx-auto max-w-7xl h-full">
+    <!-- Offline Screen (client-side only) -->
+    <ClientOnly>
+      <OfflineScreen v-if="!isOnline" />
+    </ClientOnly>
+
+    <!-- Main App -->
+    <div v-show="isOnline">
       <NuxtLayout>
         <NuxtPage />
       </NuxtLayout>
     </div>
-  </UApp>
+
+    <Toast />
+  </div>
 </template>
 
 <script setup lang="ts">
-useHead({ bodyAttrs: { class: 'flex flex-col' }, title: "Leon's Restaurant" })
+const isOnline = useOnline()
+
+useHead({bodyAttrs: {class: 'flex flex-col'}, title: "Leon's Restaurant"})
 </script>
